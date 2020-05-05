@@ -4,9 +4,12 @@
 %table#movies
   %thead
     %tr
-      %th Movie Title
-      %th Rating
-      %th Release Date
+      %th{:class => (:hilite if session[:sortby] == 'title'), :id => 'title_header'}
+        = link_to 'Movie Title', sortby_title_movies_path, method: :post
+      %th{:class => (:hilite if session[:sortby] == 'rating'), :id => 'rating_header'}
+        = link_to 'Rating', sortby_rating_movies_path, method: :post
+      %th{:class => (:hilite if session[:sortby] == 'release_date'), :id => 'release_date_header'}
+        = link_to 'Release Date', sortby_release_date_movies_path, method: :post
       %th More Info
   %tbody
     - @movies.each do |movie|
