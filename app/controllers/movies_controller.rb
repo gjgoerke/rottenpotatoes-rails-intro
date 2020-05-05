@@ -1,5 +1,13 @@
 class MoviesController < ApplicationController
 
+  def MoviesController.all_ratings
+    @all_ratings = {}
+        Movie.select(:rating).distinct.each do |movie|
+            @all_ratings[movie.rating] = '1'
+        end
+    @all_ratings
+  end
+
   def movie_params
     params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
@@ -11,27 +19,14 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @all_ratings = []
-    Movie.select(:rating).distinct.each do |movie|
-        @all_ratings.push(movie.rating)
-    end
     if params[:ratings]
-        @movies = Movie.where(rating: params[:ratings].keys)
-    else
-        @movies = Movie.all
+        session[:ratings] = params[:ratings]
     end
-    if session[:sortby] == 'title' && params[:ratings]
-        @movies = Movie.where(rating: params[:ratings].keys).order(:title)
-    elsif session[:sortby] == 'title' && !params[:ratings]
-        Movie.all.order(:title)
-    elsif (session[:sortby] == 'rating') && params[:ratings]
-        @movies = Movie.where(rating: params[:ratings].keys).order(:rating)
-    elsif (session[:sortby] == 'rating') && !params[:ratings]
-        @movies = Movie.all.order(:rating)
-    elsif session[:sortby] == 'release_date' && params[:ratings]
-        @movies = Movie.where(rating: params[:ratings].keys).order(:release_date)
-    elsif session[:sortby] == 'release_date' && !params[:ratings]
-        @movies = Movie.all.order(:release_date)
+    session[:ratings] = MoviesController.all_ratings unless session[:ratings]
+    if session[:sortby]
+        @movies = Movie.where(rating: session[:ratings].keys).order(session['sortby'])
+    else
+       @movies = Movie.where(rating: session[:ratings].keys)
     end
   end
 
