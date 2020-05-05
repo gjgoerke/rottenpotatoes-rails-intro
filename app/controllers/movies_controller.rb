@@ -11,13 +11,27 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
-    if session[:sortby] == 'title'
-        @movies = Movie.order(:title)#.sort_by(&:title)
-    elsif (session[:sortby] == 'rating') 
-        @movies = Movie.order(:rating)
-    elsif session[:sortby] == 'release_date'
-        @movies = Movie.order(:release_date)
+    @all_ratings = []
+    Movie.select(:rating).distinct.each do |movie|
+        @all_ratings.push(movie.rating)
+    end
+    if params[:ratings]
+        @movies = Movie.where(rating: params[:ratings].keys)
+    else
+        @movies = Movie.all
+    end
+    if session[:sortby] == 'title' && params[:ratings]
+        @movies = Movie.where(rating: params[:ratings].keys).order(:title)
+    elsif session[:sortby] == 'title' && !params[:ratings]
+        Movie.all.order(:title)
+    elsif (session[:sortby] == 'rating') && params[:ratings]
+        @movies = Movie.where(rating: params[:ratings].keys).order(:rating)
+    elsif (session[:sortby] == 'rating') && !params[:ratings]
+        @movies = Movie.all.order(:rating)
+    elsif session[:sortby] == 'release_date' && params[:ratings]
+        @movies = Movie.where(rating: params[:ratings].keys).order(:release_date)
+    elsif session[:sortby] == 'release_date' && !params[:ratings]
+        @movies = Movie.all.order(:release_date)
     end
   end
 
@@ -71,7 +85,6 @@ class MoviesController < ApplicationController
     else
         session[:sortby] = :release_date
     end
-    
     redirect_to movies_path
   end
 
