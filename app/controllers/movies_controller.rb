@@ -21,7 +21,7 @@ class MoviesController < ApplicationController
   def index
     @sort = params[:sort] || session[:sort]
     @ratings = params[:ratings] || session[:ratings]
-    if (!params[:ratings] || !params[:sort]) && @sort && @ratings
+    if (!params[:ratings] || !params[:sort])
         rd = true
     end
     session[:sort] = params[:sort] unless !params[:sort]
