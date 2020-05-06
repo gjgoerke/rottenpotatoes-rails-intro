@@ -19,15 +19,20 @@ class MoviesController < ApplicationController
   end
 
   def index
-    if params[:ratings]
-        session[:ratings] = params[:ratings]
+    @sort = params[:sort] || session[:sort]
+    @ratings = params[:ratings] || session[:ratings]
+    if (!params[:ratings] || !params[:sort]) && @sort && @ratings
+        rd = true
     end
-    session[:ratings] = MoviesController.all_ratings unless session[:ratings]
-    if session[:sortby]
-        @movies = Movie.where(rating: session[:ratings].keys).order(session['sortby'])
-    else
-       @movies = Movie.where(rating: session[:ratings].keys)
+    session[:sort] = params[:sort] unless !params[:sort]
+    session[:ratings] = params[:ratings] unless !params[:ratings]
+    if rd 
+        # params.permit(:sort, :commit, :utf8, {:ratings => [{:R => 1}, {'PG-13' => 1}, {:G => 1}, {:PG => 1}]})
+        params.permit!
+        ps = {:sort => @sort, :ratings => @ratings}
+        redirect_to movies_path(params: ps)
     end
+    @movies = Movie.where(rating: @ratings.keys).order(@sort)
   end
 
   def new
@@ -57,30 +62,4 @@ class MoviesController < ApplicationController
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
   end
-
-  def sortby_title
-    if session[:sortby] == 'title'
-        session[:sortby] = ''
-    else
-        session[:sortby] = :title 
-    end
-    redirect_to movies_path
-  end
-  def sortby_rating
-    if session[:sortby] == 'rating'
-        session[:sortby] = ''
-    else
-        session[:sortby] = :rating
-    end
-    redirect_to movies_path
-  end
-  def sortby_release_date
-    if session[:sortby] == 'release_date'
-        session[:sortby] = ''
-    else
-        session[:sortby] = :release_date
-    end
-    redirect_to movies_path
-  end
-
 end
