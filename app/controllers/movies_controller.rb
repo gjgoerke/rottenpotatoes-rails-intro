@@ -19,6 +19,8 @@ class MoviesController < ApplicationController
   end
 
   def index
+    session[:ratings] = MoviesController.all_ratings unless session[:ratings]
+    session[:sort] = :title unless session[:sort]
     @sort = params[:sort] || session[:sort]
     @ratings = params[:ratings] || session[:ratings]
     if (!params[:ratings] || !params[:sort])
